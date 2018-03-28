@@ -400,17 +400,20 @@ void visualize(char *cfgfile, char *weightfile)
 #endif
 }
 
+// 主函数
 int main(int argc, char **argv)
 {
-    //test_resize("data/bad.jpg");
-    //test_box();
-    //test_convolutional_layer();
-    if(argc < 2){
+    if(argc < 2)
+    {
+        // 打印使用方法 <function>对应了使用方式，比如detect是检测；
         fprintf(stderr, "usage: %s <function>\n", argv[0]);
         return 0;
     }
+    // 从参数列表中读取GPU ID的列表
     gpu_index = find_int_arg(argc, argv, "-i", 0);
-    if(find_arg(argc, argv, "-nogpu")) {
+    // 若在选项中给出没有gpu，则设定gpu的index为-1
+    if(find_arg(argc, argv, "-nogpu"))
+    {
         gpu_index = -1;
     }
 
@@ -422,23 +425,37 @@ int main(int argc, char **argv)
     }
 #endif
 
-    if (0 == strcmp(argv[1], "average")){
+    if (0 == strcmp(argv[1], "average"))
+    {
         average(argc, argv);
-    } else if (0 == strcmp(argv[1], "yolo")){
+    }
+    else if (0 == strcmp(argv[1], "yolo"))
+    {
         run_yolo(argc, argv);
-    } else if (0 == strcmp(argv[1], "super")){
+    }
+    else if (0 == strcmp(argv[1], "super"))
+    {
         run_super(argc, argv);
-    } else if (0 == strcmp(argv[1], "lsd")){
+    }
+    else if (0 == strcmp(argv[1], "lsd"))
+    {
         run_lsd(argc, argv);
-    } else if (0 == strcmp(argv[1], "detector")){
+    }
+    else if (0 == strcmp(argv[1], "detector"))
+    {
+        // 命令第二个参数对应是detector，这个函数在当前目录下的detector.c文件中定义，在本文件中进行外部引用声明
         run_detector(argc, argv);
-    } else if (0 == strcmp(argv[1], "detect")){
+    }
+    else if (0 == strcmp(argv[1], "detect"))
+    {
         float thresh = find_float_arg(argc, argv, "-thresh", .5);
         char *filename = (argc > 4) ? argv[4]: 0;
         char *outfile = find_char_arg(argc, argv, "-out", 0);
         int fullscreen = find_arg(argc, argv, "-fullscreen");
         test_detector("cfg/coco.data", argv[2], argv[3], filename, thresh, .5, outfile, fullscreen);
-    } else if (0 == strcmp(argv[1], "cifar")){
+    }
+    else if (0 == strcmp(argv[1], "cifar"))
+    {
         run_cifar(argc, argv);
     } else if (0 == strcmp(argv[1], "go")){
         run_go(argc, argv);
