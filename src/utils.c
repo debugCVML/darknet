@@ -107,10 +107,12 @@ int *random_index_order(int min, int max)
     return inds;
 }
 
+// 在參數列表中刪除下標 index 的參數
 void del_arg(int argc, char **argv, int index)
 {
     int i;
-    for(i = index; i < argc-1; ++i) argv[i] = argv[i+1];
+    for(i = index; i < argc-1; ++i)
+        argv[i] = argv[i+1];
     argv[i] = 0;
 }
 
@@ -142,12 +144,16 @@ int find_int_arg(int argc, char **argv, char *arg, int def)
     return def;
 }
 
+// 从参数列表中，寻找arg命令对应的参数值，参数类型是float类型
 float find_float_arg(int argc, char **argv, char *arg, float def)
 {
     int i;
-    for(i = 0; i < argc-1; ++i){
-        if(!argv[i]) continue;
-        if(0==strcmp(argv[i], arg)){
+    for(i = 0; i < argc-1; ++i)
+    {
+        if(!argv[i])
+            continue;
+        if(0==strcmp(argv[i], arg))
+        {
             def = atof(argv[i+1]);
             del_arg(argc, argv, i);
             del_arg(argc, argv, i);
@@ -157,12 +163,16 @@ float find_float_arg(int argc, char **argv, char *arg, float def)
     return def;
 }
 
+// 从参数列表中，找arg的命令，名返回其对应的参数值，然后删除这个命令及其参数值
 char *find_char_arg(int argc, char **argv, char *arg, char *def)
 {
     int i;
-    for(i = 0; i < argc-1; ++i){
-        if(!argv[i]) continue;
-        if(0==strcmp(argv[i], arg)){
+    for(i = 0; i < argc-1; ++i)
+    {
+        if(!argv[i])
+            continue;
+        if(0==strcmp(argv[i], arg))
+        {
             def = argv[i+1];
             del_arg(argc, argv, i);
             del_arg(argc, argv, i);
@@ -172,18 +182,20 @@ char *find_char_arg(int argc, char **argv, char *arg, char *def)
     return def;
 }
 
-
+// 从一个路径字符串中，把文件名称取出，不要前面的路径名，也不要后面的扩展名
 char *basecfg(char *cfgfile)
 {
     char *c = cfgfile;
     char *next;
+    // 寻找第一次出现/的地方
     while((next = strchr(c, '/')))
     {
         c = next+1;
     }
     c = copy_string(c);
     next = strchr(c, '.');
-    if (next) *next = 0;
+    if (next)
+        *next = 0;
     return c;
 }
 
@@ -259,9 +271,9 @@ unsigned char *read_file(char *filename)
     FILE *fp = fopen(filename, "rb");
     size_t size;
 
-    fseek(fp, 0, SEEK_END); 
+    fseek(fp, 0, SEEK_END);
     size = ftell(fp);
-    fseek(fp, 0, SEEK_SET); 
+    fseek(fp, 0, SEEK_SET);
 
     unsigned char *text = calloc(size+1, sizeof(char));
     fread(text, 1, size, fp);
@@ -275,6 +287,7 @@ void malloc_error()
     exit(-1);
 }
 
+// 输出文件打开失败错误信息
 void file_error(char *s)
 {
     fprintf(stderr, "Couldn't open file: %s\n", s);
@@ -296,16 +309,21 @@ list *split_str(char *s, char delim)
     return l;
 }
 
+// 去除字符串中的空格，制表符，回车符
 void strip(char *s)
 {
     size_t i;
     size_t len = strlen(s);
     size_t offset = 0;
-    for(i = 0; i < len; ++i){
+    for(i = 0; i < len; ++i)
+    {
         char c = s[i];
-        if(c==' '||c=='\t'||c=='\n') ++offset;
-        else s[i-offset] = c;
+        if(c==' '||c=='\t'||c=='\n')
+            ++offset;
+        else
+            s[i-offset] = c;
     }
+    // 结尾断开
     s[len-offset] = '\0';
 }
 
@@ -419,6 +437,7 @@ void write_all(int fd, char *buffer, size_t bytes)
 
 char *copy_string(char *s)
 {
+    // 这里在C++里面会出差，加一个强制转换
     char *copy = malloc(strlen(s)+1);
     strncpy(copy, s, strlen(s)+1);
     return copy;
@@ -573,7 +592,7 @@ float mag_array(float *a, int n)
     int i;
     float sum = 0;
     for(i = 0; i < n; ++i){
-        sum += a[i]*a[i];   
+        sum += a[i]*a[i];
     }
     return sqrt(sum);
 }
@@ -682,14 +701,14 @@ float rand_normal()
 
 size_t rand_size_t()
 {
-    return  ((size_t)(rand()&0xff) << 56) | 
-        ((size_t)(rand()&0xff) << 48) |
-        ((size_t)(rand()&0xff) << 40) |
-        ((size_t)(rand()&0xff) << 32) |
-        ((size_t)(rand()&0xff) << 24) |
-        ((size_t)(rand()&0xff) << 16) |
-        ((size_t)(rand()&0xff) << 8) |
-        ((size_t)(rand()&0xff) << 0);
+    return  ((size_t)(rand()&0xff) << 56) |
+            ((size_t)(rand()&0xff) << 48) |
+            ((size_t)(rand()&0xff) << 40) |
+            ((size_t)(rand()&0xff) << 32) |
+            ((size_t)(rand()&0xff) << 24) |
+            ((size_t)(rand()&0xff) << 16) |
+            ((size_t)(rand()&0xff) << 8) |
+            ((size_t)(rand()&0xff) << 0);
 }
 
 float rand_uniform(float min, float max)

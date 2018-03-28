@@ -791,37 +791,56 @@ void network_detect(network *net, image im, float thresh, float hier_thresh, flo
 }
 */
 
+// Main 函數中的 detector命令
 void run_detector(int argc, char **argv)
 {
+    // 寻找-prefix对应的参数值，是char类型，默认值是空
     char *prefix = find_char_arg(argc, argv, "-prefix", 0);
+    // 寻找-thresh对应的参数值，是float类型。默认值是0.5
     float thresh = find_float_arg(argc, argv, "-thresh", .5);
+    // 寻找-hier对应的参数值，是float类型。默认值是0.5
     float hier_thresh = find_float_arg(argc, argv, "-hier", .5);
+    // 寻找-c对应的参数值，是int类型。默认值是0
     int cam_index = find_int_arg(argc, argv, "-c", 0);
+    // 寻找-s对应的参数值，是int类型。默认值是0
     int frame_skip = find_int_arg(argc, argv, "-s", 0);
+    // 寻找-avg对应的参数值，是int类型。默认值是3
     int avg = find_int_arg(argc, argv, "-avg", 3);
-    if(argc < 4){
+
+    if(argc < 4)
+    {
         fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
         return;
     }
+
+    // 寻找gpuid，默认是0
     char *gpu_list = find_char_arg(argc, argv, "-gpus", 0);
+    // 配置输出参数
     char *outfile = find_char_arg(argc, argv, "-out", 0);
+
     int *gpus = 0;
     int gpu = 0;
     int ngpus = 0;
-    if(gpu_list){
+    if(gpu_list)
+    {
+        // 计算GPU个数
         printf("%s\n", gpu_list);
         int len = strlen(gpu_list);
         ngpus = 1;
         int i;
-        for(i = 0; i < len; ++i){
+        for(i = 0; i < len; ++i)
+        {
             if (gpu_list[i] == ',') ++ngpus;
         }
         gpus = calloc(ngpus, sizeof(int));
-        for(i = 0; i < ngpus; ++i){
+        for(i = 0; i < ngpus; ++i)
+        {
             gpus[i] = atoi(gpu_list);
             gpu_list = strchr(gpu_list, ',')+1;
         }
-    } else {
+    }
+    else // 默认设置，还没找到在哪里定义默认设置
+    {
         gpu = gpu_index;
         gpus = &gpu;
         ngpus = 1;
@@ -834,18 +853,42 @@ void run_detector(int argc, char **argv)
     int fps = find_int_arg(argc, argv, "-fps", 0);
     //int class = find_int_arg(argc, argv, "-class", 0);
 
+    // 数据配置文件
     char *datacfg = argv[3];
+    // 网络配置文件
     char *cfg = argv[4];
+    // 权重文件（可选）
     char *weights = (argc > 5) ? argv[5] : 0;
+    // 保存文件名（可选）
     char *filename = (argc > 6) ? argv[6]: 0;
-    if(0==strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, outfile, fullscreen);
-    else if(0==strcmp(argv[2], "train")) train_detector(datacfg, cfg, weights, gpus, ngpus, clear);
-    else if(0==strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
-    else if(0==strcmp(argv[2], "valid2")) validate_detector_flip(datacfg, cfg, weights, outfile);
-    else if(0==strcmp(argv[2], "recall")) validate_detector_recall(cfg, weights);
-    else if(0==strcmp(argv[2], "demo")) {
+
+    if(0==strcmp(argv[2], "test")) // 如果是测试
+    {
+        test_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, outfile, fullscreen);
+    }
+    else if(0==strcmp(argv[2], "train")) // 如果是训练
+    {
+        train_detector(datacfg, cfg, weights, gpus, ngpus, clear);
+    }
+    else if(0==strcmp(argv[2], "valid"))
+    {
+        validate_detector(datacfg, cfg, weights, outfile);
+    }
+    else if(0==strcmp(argv[2], "valid2"))
+    {
+        validate_detector_flip(datacfg, cfg, weights, outfile);
+    }
+    else if(0==strcmp(argv[2], "recall"))
+    {
+        validate_detector_recall(cfg, weights);
+    }
+    else if(0==strcmp(argv[2], "demo"))
+    {
+        // 读取demo历程中的data配置文件，把这里的文件转换成键值对放在options的双向列表中
         list *options = read_data_cfg(datacfg);
+        // 从列表中寻找定义的类别数，没有的话就定义为20
         int classes = option_find_int(options, "classes", 20);
+        // 从选项中找出所有文件名字的列表， 如果没有定义，默认就是从当前目录的下的data目录中的names.list文件中找（但是现在没有了，不知道作者是怎么维护的代码）
         char *name_list = option_find_str(options, "names", "data/names.list");
         char **names = get_labels(name_list);
         demo(cfg, weights, thresh, cam_index, filename, names, classes, frame_skip, prefix, avg, hier_thresh, width, height, fps, fullscreen);
